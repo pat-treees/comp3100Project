@@ -83,7 +83,7 @@ public class TCPClient {
 
                 System.out.println("SCHD " + jobID + " " + serverType + " " + serverID +"\n");
 
-               //SCHD job
+               //SCHD 1 job 
                 dout.write(("SCHD " + jobID + " " + serverType + " " + serverID +"\n").getBytes());
                 dout.flush();
             
