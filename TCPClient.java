@@ -43,18 +43,17 @@ public class TCPClient {
              
                 str = (String)din.readLine();
                 System.out.println("RVCD: " + str);
+
+                String[] jobInfo = str.split(" ");
+                int jobID = Integer.parseInt(jobInfo[2]); // get job ID which is JOBN jobID YY
+                System.out.println("jobID: " + jobID);
                 
-                dout.write(("GETS All\n").getBytes());
+                dout.write(("GETS All\n").getBytes()); // get data 
                 dout.flush();
                 System.out.println("SENT: GETS All");
                
                 str = (String)din.readLine();
                 System.out.println("RVCD: " + str);
-
-         
-                  String[] jobInfo = str.split(" ");
-                int jobID = Integer.parseInt(jobInfo[1]); // get job ID which is JOBN jobID YY
-                System.out.println("jobID: " + jobID);
 
                 dout.write(("OK\n").getBytes());
                 dout.flush();
@@ -71,6 +70,10 @@ public class TCPClient {
                  //loop x times and by the x time, you get the largest server type and server ID
                 }
 
+                String[] serverData = str.split(" ");
+                String serverType = serverData[0];
+                int serverID = Integer.parseInt(serverData[1]);
+
                 dout.write(("OK\n").getBytes());
                 dout.flush();
                 System.out.println("SENT: OK");
@@ -78,8 +81,14 @@ public class TCPClient {
                 str = (String)din.readLine();
                 System.out.println("RVCD: " + str);
 
-                //SCDH JOB TO LARGEST SERVER
-                
+                System.out.println("SCHD " + jobID + " " + serverType + " " + serverID +"\n");
+
+               //SCHD job
+                dout.write(("SCHD " + jobID + " " + serverType + " " + serverID +"\n").getBytes());
+                dout.flush();
+            
+                str = (String)din.readLine();
+                System.out.println("RVCD: " + str);
 
                 dout.write(("QUIT\n").getBytes());
                 dout.flush();
