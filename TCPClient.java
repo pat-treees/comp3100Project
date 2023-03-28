@@ -1,18 +1,15 @@
 import java.net.Socket;
 import java.net.InetAddress;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
-import java.util.concurrent.TimeUnit;
-//Wk 5 - job dispatcher
+
 public class TCPClient {
         /**
          * @param args
          */
         public static void main(String[] args) {
-            
             try {
                 InetAddress aHost = InetAddress.getByName(args[0]);
                 int aPort = Integer.parseInt(args[1]);
@@ -25,52 +22,64 @@ public class TCPClient {
     
                 sendMessage("HELO", dout);
     
-                receiveMessage(din);
+                receiveMessage(din); //RCVD OK
     
                 sendMessage("AUTH 46370633", dout);
     
-                receiveMessage(din);
-                
-                sendMessage("REDY", dout);
+                receiveMessage(din); // RCVD OK
+
+                while(true){ 
+                    
+                    sendMessage("REDY", dout);
              
-                String str = receiveMessage(din);
-    
-                String[] jobInfo = str.split(" ");
-                int jobID = Integer.parseInt(jobInfo[2]); // get job ID which is JOBN jobID YY
-                System.out.println("jobID: " + jobID);
+                    //receiving job data and adding it on to string
+                String check2 = receiveMessage(din);
+                String[] jobInfo = check2.split(" "); // RVCD JOB INFO
+
+                    if(check2.equals("NONE")){ 
+                        break;
+                    }
                 
-                sendMessage("GETS All", dout);
+                    System.out.println("jobs: " + jobInfo[0]);
+                    int jobID = Integer.parseInt(jobInfo[2]); // get job ID which is JOBN jobID YY
+                    System.out.println("jobID: " + jobID);
+                
+                    sendMessage("GETS All", dout);
                
-                str = receiveMessage(din);
+                    String str = receiveMessage(din); // RCV  DATA
     
-                sendMessage("OK", dout);
+                    sendMessage("OK", dout);
             
-                String[] serverInfoList = str.split(" ");
+                    String[] serverInfoList = str.split(" ");
     
-                int serverNumber = Integer.parseInt(serverInfoList[1]); //get the X (server type)
-                System.out.println("Server number: " + serverNumber);
+                    int serverNumber = Integer.parseInt(serverInfoList[1]); //get the X (server type)
+                    System.out.println("Server number: " + serverNumber);
     
-                for (int i = 0; i < serverNumber; i++){
-                   str = receiveMessage(din);
-                 //loop x times and by the x time, you get the largest server type and server ID
-                }
+                    
+                    for (int i = 0; i < serverNumber; i++){ //loop x times and by the x time, you get the largest server type and server ID
+                        str = receiveMessage(din); //DATA outputed one by one
+                    }
     
-                //extract ServerType and ServerID from data presented by server 
-                String[] serverData = str.split(" ");
-                String serverType = serverData[0];
-                int serverID = Integer.parseInt(serverData[1]);
+                    //extract ServerType and ServerID from data presented by server 
+                    String[] serverData = str.split(" ");
+                    String serverType = serverData[0];
+                    int serverID = Integer.parseInt(serverData[1]);
     
-                sendMessage("OK", dout);
+                    sendMessage("OK", dout);
     
-                receiveMessage(din);
+                    receiveMessage(din); //RCV " . "
     
-                System.out.println("SCHD " + jobID + " " + serverType + " " + serverID +"\n");
-    
-               //SCHD 1 job 
-                dout.write(("SCHD " + jobID + " " + serverType + " " + serverID +"\n").getBytes());
-                dout.flush();
-            
-                receiveMessage(din);
+                    //SCHD 1 job if JOBN
+                    if(jobInfo[0].equals("JOBN")){
+                        dout.write(("SCHD " + jobID + " " + serverType + " " + serverID +"\n").getBytes());
+                        System.out.println("SCHD jobID: " + jobID + " to " + "serverType: " + serverType);
+                        dout.flush();
+                        receiveMessage(din);
+                    } else {
+                        System.out.println("[Job: " + jobInfo[0] + "] cannot be scheduled");
+                    }
+                   
+                }   
     
                 sendMessage("QUIT", dout);
     
@@ -79,10 +88,11 @@ public class TCPClient {
                 dout.close();
                 s.close();
             
-                }
+            } 
     
             catch(Exception e){System.out.println(e);
             }
+
          
          
         }
