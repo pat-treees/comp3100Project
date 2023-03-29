@@ -28,22 +28,23 @@ public class TCPClient {
     
                 receiveMessage(din); // RCVD OK
 
+                int serverID = 0;
+                int serverCount = 1;
+                
                 while(true){ 
                     
                     sendMessage("REDY", dout);
              
                     //receiving job data and adding it on to string
-                String check2 = receiveMessage(din);
-                String[] jobInfo = check2.split(" "); // RVCD JOB INFO
-
-                    if(check2.equals("NONE")){ 
+                    String check2 = receiveMessage(din);
+                    String[] jobInfo = check2.split(" "); // RVCD JOB INFO
+                    System.out.println("jobinfo" + jobInfo[0]);
+                    
+                    if(jobInfo[0].equals("NONE")){ 
                         break;
                     }
-                
-                    System.out.println("jobs: " + jobInfo[0]);
+
                     int jobID = Integer.parseInt(jobInfo[2]); // get job ID which is JOBN jobID YY
-                    System.out.println("jobID: " + jobID);
-                
                     sendMessage("GETS All", dout);
                
                     String str = receiveMessage(din); // RCV  DATA
@@ -53,37 +54,58 @@ public class TCPClient {
                     String[] serverInfoList = str.split(" ");
     
                     int serverNumber = Integer.parseInt(serverInfoList[1]); //get the X (server type)
-                    System.out.println("Server number: " + serverNumber);
-    
-                    
-                    for (int i = 0; i < serverNumber; i++){ //loop x times and by the x time, you get the largest server type and server ID
-                        str = receiveMessage(din); //DATA outputed one by one
-                    }
-    
-                    //extract ServerType and ServerID from data presented by server 
-                    String[] serverData = str.split(" ");
-                    String serverType = serverData[0];
-                    int serverID = Integer.parseInt(serverData[1]);
-    
+
+                    String serverType = " ";
+            
+                    int core = 0;
+            
+                     //get largest server type
+
+                    for(int i = 0; i < serverNumber; i++){
+                        //loop x times and by the x time, you get the largest server type and server ID
+                        str = receiveMessage(din); //DATA outputed one by one 
+                        String[] serverData = str.split(" ");
+                        System.out.println("str = " + str);
+                      
+                        if(core < Integer.parseInt(serverData[4])){
+                            serverCount = 1;   
+                            core = Integer.parseInt(serverData[4]);
+                            serverID = Integer.parseInt(serverData[1]);
+                            if(serverType.equals(serverData[0])){
+                                serverCount ++;    
+                                System.out.println("reaches");
+                            }
+                            serverType = serverData[0];
+                        } 
+                        else if(serverType.equals(serverData[0])){
+                            serverCount ++;    
+                        }
+                     }
+                     System.out.println("ServerType = " + serverType + " core = " + core);
+                     System.out.println("serverID = " + serverID);
+                     System.out.println("serverCount = " + serverCount);
+
+                     
+                    System.out.println("serverID = " + serverID);
+
+
+                    serverID%=serverCount; 
+
                     sendMessage("OK", dout);
     
                     receiveMessage(din); //RCV " . "
-    
+
                     //SCHD 1 job if JOBN
                     if(jobInfo[0].equals("JOBN")){
                         dout.write(("SCHD " + jobID + " " + serverType + " " + serverID +"\n").getBytes());
-                        System.out.println("SCHD jobID: " + jobID + " to " + "serverType: " + serverType);
                         dout.flush();
                         receiveMessage(din);
-                    } else {
-                        System.out.println("[Job: " + jobInfo[0] + "] cannot be scheduled");
-                    }
-                   
-                }   
+                        System.out.println("SCHD jobID: " + jobID + " to Server: " + serverType + " : " + serverID);
+                    }  
+                } 
     
                 sendMessage("QUIT", dout);
     
-                
                 din.close();
                 dout.close();
                 s.close();
@@ -92,8 +114,6 @@ public class TCPClient {
     
             catch(Exception e){System.out.println(e);
             }
-
-         
          
         }
     
@@ -101,13 +121,11 @@ public class TCPClient {
         static void sendMessage(String str, DataOutputStream dout) throws IOException{ 
             dout.write((str + "\n").getBytes());
             dout.flush();
-            System.out.println("SENT: " + str);
         }
     
         // Function below receivers message from server and prints it out on terminal
         static String receiveMessage(BufferedReader din) throws IOException{
             String str = (String)din.readLine();
-            System.out.println("RVCD: " + str);
             return str;
     
         }
