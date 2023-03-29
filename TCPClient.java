@@ -35,7 +35,7 @@ public class TCPClient {
                     
                     sendMessage("REDY", dout);
              
-                    //receiving job data and adding it on to string
+                    //-receiving job data and adding it on to string
                     String check2 = receiveMessage(din);
                     String[] jobInfo = check2.split(" "); // RVCD JOB INFO
                     System.out.println("jobinfo" + jobInfo[0]);
