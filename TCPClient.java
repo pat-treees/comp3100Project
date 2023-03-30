@@ -30,22 +30,25 @@ public class TCPClient {
 
                 int serverID = 0;
                 int serverCount = 1;
-                boolean flag = true;
+                int flag = 1;
+                String serverType = " ";
+                int core = 0;
                 
                 while(true){ 
                     
                     sendMessage("REDY", dout);
              
                     //-receiving job data and adding it on to string
-                    String check2 = receiveMessage(din);
-                    String[] jobInfo = check2.split(" "); // RVCD JOB INFO
-                    System.out.println("jobinfo" + jobInfo[0]);
+                    String jobInfo = receiveMessage(din);
+                    String[] jobs = jobInfo.split(" "); // RVCD JOB INFO
+                    System.out.println("jobinfo" + jobs[0]);
                     
-                    if(jobInfo[0].equals("NONE")){ 
+                    if(jobs[0].equals("NONE")){ 
                         break;
                     }
 
-                    int jobID = Integer.parseInt(jobInfo[2]); // get job ID which is JOBN jobID YY
+                    int jobID = Integer.parseInt(jobs[2]); // get job ID which is JOBN jobID YY
+                   
                     sendMessage("GETS All", dout);
                
                     String str = receiveMessage(din); // RCV  DATA
@@ -55,27 +58,23 @@ public class TCPClient {
                     String[] serverInfoList = str.split(" ");
     
                     int serverNumber = Integer.parseInt(serverInfoList[1]); //get the X (server type)
-
-                    String serverType = " ";
-            
-                    int core = 0;
             
                      //get largest server type
 
                      System.out.println("flag1: "+ flag);
 
-                    if (flag = true){
-                        System.out.println("this is running");
-                    for(int i = 0; i < serverNumber; i++){
+                        for(int i = 0; i < serverNumber; i++){
                          //loop x times and by the x time, you get the largest server type and server ID
                         str = receiveMessage(din); //DATA outputed one by one 
                         String[] serverData = str.split(" ");
                         System.out.println("str = " + str);
                         
+                        if (flag == 1){
                             if(core < Integer.parseInt(serverData[4])){
                                 serverCount = 1;   
                                 core = Integer.parseInt(serverData[4]);
-                                serverID = Integer.parseInt(serverData[1]);                                    serverType = serverData[0];
+                                serverID = Integer.parseInt(serverData[1]);                                    
+                                serverType = serverData[0];
                                 }
                                 else if(serverType.equals(serverData[0])){
                                 serverCount ++;    
@@ -83,16 +82,8 @@ public class TCPClient {
                         }
                     } 
 
-                    flag = false;
-                    System.out.println("flag2: "+ flag);
-
-
-                     System.out.println("ServerType = " + serverType + " core = " + core);
-                     System.out.println("serverID = " + serverID);
-                     System.out.println("serverCount = " + serverCount);
-
-                     
-                    System.out.println("serverID = " + serverID);
+                    flag = 0;
+                
 
                     sendMessage("OK", dout);
     
@@ -101,7 +92,7 @@ public class TCPClient {
                     //SCHD 1 job if JOBN
                     serverID%=serverCount; 
 
-                    if(jobInfo[0].equals("JOBN")){
+                    if(jobs[0].equals("JOBN")){
                         dout.write(("SCHD " + jobID + " " + serverType + " " + serverID +"\n").getBytes());
                         dout.flush();
                         receiveMessage(din);
@@ -137,4 +128,3 @@ public class TCPClient {
 
     }
         }
-        
