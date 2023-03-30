@@ -6,9 +6,9 @@ import java.io.InputStreamReader;
 import java.io.BufferedReader;
 
 public class TCPClient {
-        /**
-         * @param args
-         */
+    /**
+     *  * @param args
+     *  */
         public static void main(String[] args) {
             try {
                 InetAddress aHost = InetAddress.getByName(args[0]);
@@ -30,6 +30,7 @@ public class TCPClient {
 
                 int serverID = 0;
                 int serverCount = 1;
+                boolean flag = true;
                 
                 while(true){ 
                     
@@ -61,26 +62,31 @@ public class TCPClient {
             
                      //get largest server type
 
+                     System.out.println("flag1: "+ flag);
+
+                    if (flag = true){
+                        System.out.println("this is running");
                     for(int i = 0; i < serverNumber; i++){
-                        //loop x times and by the x time, you get the largest server type and server ID
+                         //loop x times and by the x time, you get the largest server type and server ID
                         str = receiveMessage(din); //DATA outputed one by one 
                         String[] serverData = str.split(" ");
                         System.out.println("str = " + str);
-                      
-                        if(core < Integer.parseInt(serverData[4])){
-                            serverCount = 1;   
-                            core = Integer.parseInt(serverData[4]);
-                            serverID = Integer.parseInt(serverData[1]);
-                            if(serverType.equals(serverData[0])){
+                        
+                            if(core < Integer.parseInt(serverData[4])){
+                                serverCount = 1;   
+                                core = Integer.parseInt(serverData[4]);
+                                serverID = Integer.parseInt(serverData[1]);                                    serverType = serverData[0];
+                                }
+                                else if(serverType.equals(serverData[0])){
                                 serverCount ++;    
-                                System.out.println("reaches");
                             }
-                            serverType = serverData[0];
-                        } 
-                        else if(serverType.equals(serverData[0])){
-                            serverCount ++;    
                         }
-                     }
+                    } 
+
+                    flag = false;
+                    System.out.println("flag2: "+ flag);
+
+
                      System.out.println("ServerType = " + serverType + " core = " + core);
                      System.out.println("serverID = " + serverID);
                      System.out.println("serverCount = " + serverCount);
@@ -88,19 +94,19 @@ public class TCPClient {
                      
                     System.out.println("serverID = " + serverID);
 
-
-                    serverID%=serverCount; 
-
                     sendMessage("OK", dout);
     
                     receiveMessage(din); //RCV " . "
 
                     //SCHD 1 job if JOBN
+                    serverID%=serverCount; 
+
                     if(jobInfo[0].equals("JOBN")){
                         dout.write(("SCHD " + jobID + " " + serverType + " " + serverID +"\n").getBytes());
                         dout.flush();
                         receiveMessage(din);
                         System.out.println("SCHD jobID: " + jobID + " to Server: " + serverType + " : " + serverID);
+                        serverID++;
                     }  
                 } 
     
@@ -111,25 +117,24 @@ public class TCPClient {
                 s.close();
             
             } 
-    
+
+
             catch(Exception e){System.out.println(e);
             }
          
         }
-    
-        // Function below sends message to server and prints it out on terminal
-        static void sendMessage(String str, DataOutputStream dout) throws IOException{ 
-            dout.write((str + "\n").getBytes());
-            dout.flush();
-        }
-    
-        // Function below receivers message from server and prints it out on terminal
-        static String receiveMessage(BufferedReader din) throws IOException{
-            String str = (String)din.readLine();
-            return str;
-    
-        }
 
- }
-    
-    
+    // Function below sends message to server and prints it out on terminal
+    static void sendMessage(String str, DataOutputStream dout) throws IOException {
+        dout.write((str + "\n").getBytes());
+        dout.flush();
+    }
+
+    // Function below receivers message from server and prints it out on terminal
+    static String receiveMessage(BufferedReader din) throws IOException {
+        String str = (String) din.readLine();
+        return str;
+
+    }
+        }
+        
