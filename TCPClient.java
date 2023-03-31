@@ -16,15 +16,17 @@ public class TCPClient {
                 Socket s = new Socket(aHost, aPort);
                 DataOutputStream dout = new DataOutputStream(s.getOutputStream());
                 BufferedReader din = new BufferedReader(new InputStreamReader(s.getInputStream()));
-    
+                
                 System.out.println("Target IP: " + s.getInetAddress() + "Target Port: "+ s.getPort());
                 System.out.println("Local IP: " + s.getLocalAddress() + "Local Port: " + s.getLocalPort());
-    
+                String username = System.getProperty("user.name");
+                System.out.println("username = " + username);
+
                 sendMessage("HELO", dout);
     
                 receiveMessage(din); //RCVD OK
     
-                sendMessage("AUTH 46370633", dout);
+                sendMessage("AUTH " + username, dout);
     
                 receiveMessage(din); // RCVD OK
 
@@ -60,16 +62,14 @@ public class TCPClient {
                     int serverNumber = Integer.parseInt(serverInfoList[1]); //get the X (server type)
             
                      //get largest server type
-
-                     System.out.println("flag1: "+ flag);
-
-                        for(int i = 0; i < serverNumber; i++){
+                     
+                    for(int i = 0; i < serverNumber; i++){
                          //loop x times and by the x time, you get the largest server type and server ID
                         str = receiveMessage(din); //DATA outputed one by one 
-                        String[] serverData = str.split(" ");
                         System.out.println("str = " + str);
-                        
-                        if (flag == 1){
+
+                      /* */  if (flag == 1){
+                            String[] serverData = str.split(" ");
                             if(core < Integer.parseInt(serverData[4])){
                                 serverCount = 1;   
                                 core = Integer.parseInt(serverData[4]);
@@ -80,19 +80,23 @@ public class TCPClient {
                                 serverCount ++;    
                             }
                         }
-                    } 
+                    }
 
                     flag = 0;
                 
+                    System.out.println("servercount = " + serverCount);
+                    System.out.println("serverType = " + serverType);
+                    System.out.println("serverID = " + serverID);
 
                     sendMessage("OK", dout);
     
                     receiveMessage(din); //RCV " . "
 
                     //SCHD 1 job if JOBN
-                    serverID%=serverCount; 
 
                     if(jobs[0].equals("JOBN")){
+                        serverID%=serverCount; 
+
                         dout.write(("SCHD " + jobID + " " + serverType + " " + serverID +"\n").getBytes());
                         dout.flush();
                         receiveMessage(din);
