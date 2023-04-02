@@ -20,7 +20,6 @@ public class TCPClient {
                 System.out.println("Target IP: " + s.getInetAddress() + "Target Port: "+ s.getPort());
                 System.out.println("Local IP: " + s.getLocalAddress() + "Local Port: " + s.getLocalPort());
                 String username = System.getProperty("user.name");
-                System.out.println("username = " + username);
 
                 sendMessage("HELO", dout);
     
@@ -43,7 +42,6 @@ public class TCPClient {
                     //-receiving job data and adding it on to string
                     String jobInfo = receiveMessage(din);
                     String[] jobs = jobInfo.split(" "); // RVCD JOB INFO
-                    System.out.println("jobinfo" + jobs[0]);
                     
                     if(jobs[0].equals("NONE")){ 
                         break;
@@ -66,7 +64,6 @@ public class TCPClient {
                     for(int i = 0; i < serverNumber; i++){
                          //loop x times and by the x time, you get the largest server type and server ID
                         str = receiveMessage(din); //DATA outputed one by one 
-                        System.out.println("str = " + str);
 
                       /* */  if (flag == 1){
                             String[] serverData = str.split(" ");
@@ -83,10 +80,6 @@ public class TCPClient {
                     }
 
                     flag = 0;
-                
-                    System.out.println("servercount = " + serverCount);
-                    System.out.println("serverType = " + serverType);
-                    System.out.println("serverID = " + serverID);
 
                     sendMessage("OK", dout);
     
