@@ -64,8 +64,9 @@ public class TCPClient {
                     for(int i = 0; i < serverNumber; i++){
                          //loop x times and by the x time, you get the largest server type and server ID
                         str = receiveMessage(din); //DATA outputed one by one 
+                        System.out.println("str = " + str);
 
-                      /* */  if (flag == 1){
+                        if (flag == 1){
                             String[] serverData = str.split(" ");
                             if(core < Integer.parseInt(serverData[4])){
                                 serverCount = 1;   
