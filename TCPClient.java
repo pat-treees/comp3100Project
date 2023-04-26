@@ -15,10 +15,10 @@ public class TCPClient {
                 int aPort = Integer.parseInt(args[1]);
                 Socket s = new Socket(aHost, aPort);
                 DataOutputStream dout = new DataOutputStream(s.getOutputStream());
-                BufferedReader din = new BufferedReader(new InputStreamReader(s.getInputStream()));
+                         BufferedReader din = new BufferedReader(new InputStreamReader(s.getInputStream()));
                 
                 System.out.println("Target IP: " + s.getInetAddress() + "Target Port: "+ s.getPort());
-                System.out.println("Local IP: " + s.getLocalAddress() + "Local Port: " + s.getLocalPort());
+                      System.out.println("Local IP: " + s.getLocalAddress() + "Local Port: " + s.getLocalPort());
                 String username = System.getProperty("user.name");
 
                 sendMessage("HELO", dout);
@@ -30,10 +30,8 @@ public class TCPClient {
                 receiveMessage(din); // RCVD OK
 
                 int serverID = 0;
-                int serverCount = 1;
                 int flag = 1;
                 String serverType = " ";
-                int core = 0;
                 
                 while(true){ 
                     
@@ -47,11 +45,16 @@ public class TCPClient {
                         break;
                     }
 
+                    if(jobs[0].equals("JOBN")){
+
                     int jobID = Integer.parseInt(jobs[2]); // get job ID which is JOBN jobID YY
-                   
-                    sendMessage("GETS All", dout);
+
+                    int jobCore = Integer.parseInt(jobs[4]);
+                    int jobRAM = Integer.parseInt(jobs[5]);
+                    int jobDisk = Integer.parseInt(jobs[6]);
+                    sendMessage("GETS Capable " + jobCore + " " + jobRAM + " " + jobDisk, dout);
                
-                    String str = receiveMessage(din); // RCV  DATA
+                    String str = receiveMessage(din); // RCV full server DATA
     
                     sendMessage("OK", dout);
             
@@ -59,45 +62,33 @@ public class TCPClient {
     
                     int serverNumber = Integer.parseInt(serverInfoList[1]); //get the X (server type)
             
-                     //get largest server type
-                     
+                     //record all capable servers one by one
                     for(int i = 0; i < serverNumber; i++){
                          //loop x times and by the x time, you get the largest server type and server ID
                         str = receiveMessage(din); //DATA outputed one by one 
-                        System.out.println("str = " + str);
-
+                        String[] serverData = str.split(" ");
+                    System.out.print(flag);
                         if (flag == 1){
-                            String[] serverData = str.split(" ");
-                            if(core < Integer.parseInt(serverData[4])){
-                                serverCount = 1;   
-                                core = Integer.parseInt(serverData[4]);
-                                serverID = Integer.parseInt(serverData[1]);                                    
-                                serverType = serverData[0];
-                                }
-                                else if(serverType.equals(serverData[0])){
-                                serverCount ++;    
-                            }
+                            
+                                serverID = Integer.parseInt(serverData[1]);  
+                                serverType = serverData[0];                                  
                         }
+                        flag = 0;
                     }
 
-                    flag = 0;
+                    flag = 1;
 
                     sendMessage("OK", dout);
     
                     receiveMessage(din); //RCV " . "
 
                     //SCHD 1 job if JOBN
-
-                    if(jobs[0].equals("JOBN")){
-                        serverID%=serverCount; 
-
                         dout.write(("SCHD " + jobID + " " + serverType + " " + serverID +"\n").getBytes());
                         dout.flush();
                         receiveMessage(din);
-                        System.out.println("SCHD jobID: " + jobID + " to Server: " + serverType + " : " + serverID);
-                        serverID++;
-                    }  
-                } 
+                    
+                }
+                }
     
                 sendMessage("QUIT", dout);
     
