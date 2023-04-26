@@ -1,0 +1,12 @@
+6,7c6,7
+< RCVD AUTH pattywatty
+< # Welcome  pattywatty!
+---
+> RCVD AUTH 46370633
+> # Welcome  46370633!
+6,7c6,7
+< RCVD AUTH pattywatty
+< # Welcome  pattywatty!
+---
+> RCVD AUTH 46370633
+> # Welcome  46370633!
